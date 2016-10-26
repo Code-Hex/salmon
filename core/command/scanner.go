@@ -30,7 +30,14 @@ func (sc *Scanner) Scan() (tok Token, literal string, err error) {
 		return
 	}
 
-	if sc.isEOF() {
+	if sc.isEOL(ch) {
+		tok = EOL
+		sc.line++
+		sc.next()
+		return
+	}
+
+	if ch == eof {
 		tok = EOF
 		return
 	}
@@ -90,7 +97,7 @@ func (sc *Scanner) back() {
 }
 
 func isWhitespace(ch rune) bool {
-	return ch == ' '
+	return ch == ' ' || ch == '\t'
 }
 
 func (sc *Scanner) isEOF() bool {
@@ -98,7 +105,7 @@ func (sc *Scanner) isEOF() bool {
 }
 
 func (sc *Scanner) isEOL(ch rune) bool {
-	return ch == '\n' || ch == eof
+	return ch == '\n'
 }
 
 func isLetter(ch rune) bool {

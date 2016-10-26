@@ -6,7 +6,8 @@ import (
 )
 
 func main() {
-	src := `ping hello hello1 world`
+	src := `ping hello
+	 hello1 world`
 	parser := command.NewParser(src)
 
 	result, err := parser.Parse()

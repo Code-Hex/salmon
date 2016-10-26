@@ -29,10 +29,13 @@ func (p *Parser) Parse() (*Exec, error) {
 			break
 		}
 
-		if tok != IDENT {
-			exec.command = lit
-		} else {
+		switch tok {
+		case EOL:
+			continue
+		case IDENT:
 			exec.args = append(exec.args, lit)
+		default:
+			exec.command = lit
 		}
 	}
 
