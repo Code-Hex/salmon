@@ -1,0 +1,40 @@
+package command
+
+type Exec struct {
+	command string
+	args    []string
+}
+
+type Parser struct {
+	sc *Scanner
+}
+
+func NewParser(src string) *Parser {
+	return &Parser{sc: NewScanner(src)}
+}
+
+// Parse parses a SQL SELECT statement.
+func (p *Parser) Parse() (*Exec, error) {
+	exec := &Exec{}
+
+	// Next we should loop over all our comma-delimited fields.
+	for {
+		// Read a field.
+		tok, lit, err := p.sc.Scan()
+		if err != nil {
+			return exec, err
+		}
+
+		if tok == EOF {
+			break
+		}
+
+		if tok != IDENT {
+			exec.command = lit
+		} else {
+			exec.args = append(exec.args, lit)
+		}
+	}
+
+	return exec, nil
+}
