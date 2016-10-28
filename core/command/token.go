@@ -12,8 +12,10 @@ const (
 
 	// command keywords
 	PING
+	HELP
 )
 
 var CommandNames = map[string]Token{
 	"ping": PING,
+	"help": HELP,
 }

@@ -1,5 +1,7 @@
 package command
 
+import "fmt"
+
 type Exec struct {
 	command string
 	args    []string
@@ -31,6 +33,9 @@ LOOP:
 		case IDENT:
 			exec.args = append(exec.args, lit)
 		default:
+			if exec.command != "" {
+				return exec, fmt.Errorf(`syntax error: command name already parsed "%s"`, lit)
+			}
 			exec.command = lit
 		}
 	}

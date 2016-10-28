@@ -19,7 +19,12 @@ func (sc *Scanner) Scan() (tok Token, literal string, err error) {
 
 	sc.skipWhiteSpace()
 	ch := sc.peek()
-	fmt.Println(ch)
+
+	if ch == eof {
+		tok = EOF
+		return
+	}
+	// fmt.Println(ch)
 	if isLetter(ch) {
 		literal = sc.scanIdentifier()
 		if token, ok := CommandNames[literal]; ok {
@@ -32,13 +37,7 @@ func (sc *Scanner) Scan() (tok Token, literal string, err error) {
 
 	if sc.isEOL(ch) {
 		tok = EOL
-		sc.line++
 		sc.next()
-		return
-	}
-
-	if ch == eof {
-		tok = EOF
 		return
 	}
 

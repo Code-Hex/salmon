@@ -1,21 +1,28 @@
 package main
 
 import (
+	"fmt"
+
 	"../../../command"
-	"github.com/k0kubun/pp"
 )
 
 func main() {
-	src := `ping              hello
-	 hello1 
 
-	 world`
-	parser := command.NewParser(src)
+	src := `ping hello
+		 hello1
 
-	result, err := parser.Parse()
+		 world`
+	/*
+		parser := command.NewParser(src)
+
+		result, err := parser.Parse()
+		if err != nil {
+			panic(err)
+		}
+	*/
+	result, err := command.Execute(src)
 	if err != nil {
 		panic(err)
 	}
-
-	pp.Print(result)
+	fmt.Println(result)
 }
