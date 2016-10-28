@@ -21,6 +21,7 @@ type Salmon struct {
 	args    []string
 	swim    *cobra.Command
 	slack   *slack.Client
+	flake   *Flake
 	rtm     *slack.RTM
 	logger  zap.Logger
 }
@@ -30,7 +31,7 @@ func (salmon *Salmon) RootCmdNew() *cobra.Command {
 		Use:   "salmon",
 		Short: msg,
 		Long:  msg,
-		Run:   salmon.Dive,
+		RunE:  salmon.Dive,
 	}
 }
 
@@ -38,6 +39,7 @@ func Generate(Out zap.WriteSyncer) *Salmon {
 	slack := slack.New(os.Getenv("SLACK_TOKEN"))
 	salmon := &Salmon{
 		slack: slack,
+		flake: FlakeNew(),
 		rtm:   slack.NewRTM(),
 		logger: zap.New(
 			zap.NewTextEncoder(zap.TextTimeFormat(time.ANSIC)),
@@ -49,11 +51,13 @@ func Generate(Out zap.WriteSyncer) *Salmon {
 	salmon.swim = salmon.RootCmdNew()
 
 	// Register sub command
-	salmon.swim.AddCommand(salmon.FlakeCmdNew())
+	salmon.swim.AddCommand(salmon.flake.command)
 	salmon.swim.AddCommand(salmon.SlackCmdNew())
 
+	// Register flags on root command
 	salmon.swim.Flags().BoolVarP(&salmon.trace, "trace", "t", false, "display detail error messages")
 	salmon.swim.Flags().BoolVarP(&salmon.version, "version", "v", false, "display the version of salmon and exit")
+
 	return salmon
 }
 
@@ -69,11 +73,12 @@ func (salmon *Salmon) Swim() int {
 	return 0
 }
 
-func (salmon *Salmon) Dive(cmd *cobra.Command, args []string) {
+func (salmon *Salmon) Dive(cmd *cobra.Command, args []string) error {
 	if salmon.version {
 		os.Stdout.Write([]byte(msg))
 	} else {
 		fmt.Println("salmon")
 	}
 
+	return nil
 }
