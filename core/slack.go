@@ -5,7 +5,21 @@ import (
 
 	"github.com/k0kubun/pp"
 	"github.com/nlopes/slack"
+	"github.com/spf13/cobra"
 )
+
+func (salmon *Salmon) SlackCmdNew() *cobra.Command {
+	return &cobra.Command{
+		Use:   "slack",
+		Short: "run with slack bot mode",
+		Long:  "run with slack bot mode",
+		Run:   salmon.SlackCmdRun,
+	}
+}
+
+func (salmon *Salmon) SlackCmdRun(cmd *cobra.Command, args []string) {
+	salmon.connectRTM()
+}
 
 func (salmon *Salmon) connectRTM() {
 	go salmon.rtm.ManageConnection()
