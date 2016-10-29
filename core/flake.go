@@ -15,7 +15,7 @@ import (
 
 var PluginTemplate = `
 var run = map[string]func(...string) (string, error){
-	{{range .}}{{.Key}}: plugin.Run{{.Value}},{{end}}
+	{{range .}}"{{.Key}}": plugin.Run{{.Value}},{{end}}
 }
 `
 
@@ -72,7 +72,7 @@ func (flake *Flake) pluginRegister() error {
 }
 
 func (flake *Flake) findSourceCode(fileInfos []os.FileInfo) {
-	regex := regexp.MustCompile(`func Run\([A-Za-z]+\)`)
+	regex := regexp.MustCompile(`func Run([A-Za-z]+)`)
 
 	for _, fi := range fileInfos {
 		f, err := os.Open("plugin/" + fi.Name())
@@ -86,8 +86,6 @@ func (flake *Flake) findSourceCode(fileInfos []os.FileInfo) {
 }
 
 func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
-	// ここに open して Run[A-Za-z]+()を探して,
-	// map へ "[a-z]+":"Run[A-Za-z]+" を保存する
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := scanner.Text()
