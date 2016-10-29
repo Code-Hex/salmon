@@ -91,9 +91,10 @@ func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := scanner.Text()
+		os.Stdout.Write([]byte(text))
 		if re.MatchString(text) {
-			captured := re.FindSubmatch([]byte(text))
-			name := string(captured[0])
+			captured := re.FindStringSubmatch(text)
+			name := captured[1]
 			flake.ptemplates = append(flake.ptemplates, Ptemplate{
 				Key:   strings.ToLower(name),
 				Value: name,
