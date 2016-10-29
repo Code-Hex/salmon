@@ -107,7 +107,7 @@ func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 func (flake *Flake) MigrateExecutorGo() error {
 	regex := regexp.MustCompile(`var run = map[string]func(...string)`)
 
-	gof, err := os.Open("executor.go", os.O_RDWR)
+	f, err := os.OpenFile("executor.go", os.O_RDWR, 0666)
 	if err != nil {
 		return errors.Wrapf(err, "Could not open executor.go")
 	}
