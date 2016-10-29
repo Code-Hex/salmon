@@ -58,7 +58,7 @@ func (flake *Flake) pluginRegister() error {
 func (flake *Flake) grepRunInPlugins() {
 	// ここに open して Run[A-Za-z]+()を探して,
 	// map へ "[a-z]+":"Run[A-Za-z]+" を保存する
-	for path := range <-flake.pathCh {
+	for _, path := range <-flake.pathCh {
 		fmt.Println(path)
 	}
 }
