@@ -1,0 +1,10 @@
+package: .
+import:
+- package: github.com/Code-Hex/salmon
+  subpackages:
+  - core
+- package: github.com/k0kubun/pp
+- package: github.com/nlopes/slack
+- package: github.com/pkg/errors
+- package: github.com/spf13/cobra
+- package: github.com/uber-go/zap
