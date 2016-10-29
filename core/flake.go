@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 
@@ -14,9 +16,9 @@ import (
 )
 
 var PluginTemplate = `
-
 var run = map[string]func(...string) (string, error){
-{{range .}}    "{{.Key}}": plugin.Run{{.Value}},{{end}}
+{{range .}}    "{{.Key}}": plugin.Run{{.Value}},
+{{end}}
 }
 `
 
@@ -90,7 +92,6 @@ func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := scanner.Text()
-		os.Stdout.Write([]byte(text))
 		if re.MatchString(text) {
 			captured := re.FindStringSubmatch(text)
 			name := captured[1]
@@ -105,7 +106,7 @@ func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 }
 
 func (flake *Flake) MigrateExecutorGo() error {
-	regex := regexp.MustCompile(`var run = map[string]func(...string)`)
+	regex := regexp.MustCompile(`var run = map`)
 
 	f, err := os.OpenFile("executor.go", os.O_RDWR, 0666)
 	if err != nil {
@@ -120,12 +121,26 @@ func (flake *Flake) MigrateExecutorGo() error {
 		if regex.MatchString(text) {
 			break
 		}
-		src += text
+		src += text + "\n"
 	}
+
+	f.Seek(0, io.SeekStart)
+	f.Truncate(0)
+
 	tmpl := template.New("PluginTemplate for executor.go")
 	template.Must(tmpl.Parse(src + PluginTemplate))
 
 	tmpl.Execute(f, flake.ptemplates)
+
+	out, err := exec.Command("goimports", "executor.go").Output()
+	if err != nil {
+		return errors.Wrapf(err, "Failed goimports")
+	}
+
+	f.Seek(0, io.SeekStart)
+	f.Truncate(0)
+
+	f.Write(out)
 
 	return nil
 }

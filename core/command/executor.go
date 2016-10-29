@@ -1,6 +1,4 @@
-package command
-
-import "./plugin"
+import "github.com/Code-Hex/salmon/core/command/plugin"
 
 func Execute(src string) (string, error) {
 	parser := NewParser(src)
@@ -14,5 +12,6 @@ func Execute(src string) (string, error) {
 }
 
 var run = map[string]func(...string) (string, error){
+	"echo": plugin.RunEcho,
 	"ping": plugin.RunPing,
 }
