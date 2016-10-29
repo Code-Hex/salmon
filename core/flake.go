@@ -10,11 +10,13 @@ import (
 
 type Flake struct {
 	plugin  bool
+	pathCh  chan string
 	command *cobra.Command
 }
 
 func FlakeNew() *Flake {
 	flake := &Flake{
+		pathCh: make(chan string),
 		command: &cobra.Command{
 			Use:   "flake",
 			Short: "run with cli mode",
@@ -38,13 +40,16 @@ func (flake *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
 }
 
 func (flake *Flake) pluginRegister() error {
-	fileInfos, err := ioutil.ReadDir("plugin")
+	base := "plugin"
+	fileInfos, err := ioutil.ReadDir(base)
 	if err != nil {
 		return errors.Wrapf(err, "Could not open plugin directory")
 	}
 
+	go flake.grepRunInPlugins()
+
 	for _, fi := range fileInfos {
-		fmt.Println(fi.Name())
+		flake.pathCh <- base + "/" + fi.Name()
 	}
 
 	return nil
@@ -53,4 +58,7 @@ func (flake *Flake) pluginRegister() error {
 func (flake *Flake) grepRunInPlugins() {
 	// ここに open して Run[A-Za-z]+()を探して,
 	// map へ "[a-z]+":"Run[A-Za-z]+" を保存する
+	for path := range <-flake.pathCh {
+		fmt.Println(path)
+	}
 }
