@@ -28,10 +28,11 @@ type Salmon struct {
 
 func (salmon *Salmon) RootCmdNew() *cobra.Command {
 	return &cobra.Command{
-		Use:   "salmon",
-		Short: msg,
-		Long:  msg,
-		RunE:  salmon.Dive,
+		Use:           "salmon",
+		Short:         msg,
+		Long:          msg,
+		RunE:          salmon.Dive,
+		SilenceErrors: true,
 	}
 }
 

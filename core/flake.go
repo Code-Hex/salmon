@@ -2,8 +2,7 @@ package core
 
 import (
 	"fmt"
-	"io"
-	"os"
+	"io/ioutil"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -39,23 +38,19 @@ func (flake *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
 }
 
 func (flake *Flake) pluginRegister() error {
-
-	dir, err := os.Open("plugin")
+	fileInfos, err := ioutil.ReadDir("plugin")
 	if err != nil {
 		return errors.Wrapf(err, "Could not open plugin directory")
 	}
-	defer dir.Close()
 
-	for {
-		entries, err := dir.Readdir(256)
-		if err == io.EOF {
-			break
-		}
-
-		for _, fi := range entries {
-			fmt.Println(fi.Name())
-		}
+	for _, fi := range fileInfos {
+		fmt.Println(fi.Name())
 	}
 
 	return nil
+}
+
+func (flake *Flake) grepRunInPlugins() {
+	// ここに open して Run[A-Za-z]+()を探して,
+	// map へ "[a-z]+":"Run[A-Za-z]+" を保存する
 }
