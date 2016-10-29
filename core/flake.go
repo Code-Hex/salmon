@@ -14,8 +14,9 @@ import (
 )
 
 var PluginTemplate = `
+
 var run = map[string]func(...string) (string, error){
-	{{range .}}"{{.Key}}": plugin.Run{{.Value}},{{end}}
+{{range .}}    "{{.Key}}": plugin.Run{{.Value}},{{end}}
 }
 `
 
@@ -64,9 +65,9 @@ func (flake *Flake) pluginRegister() error {
 	}
 
 	flake.findSourceCode(fileInfos)
-	tmpl := template.New("PluginTemplate for executor.go")
-	template.Must(tmpl.Parse(PluginTemplate))
-	tmpl.Execute(os.Stdout, flake.ptemplates)
+	if err := flake.MigrateExecutorGo(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -101,4 +102,30 @@ func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 			return
 		}
 	}
+}
+
+func (flake *Flake) MigrateExecutorGo() error {
+	regex := regexp.MustCompile(`var run = map[string]func(...string)`)
+
+	gof, err := os.Open("executor.go", os.O_RDWR)
+	if err != nil {
+		return errors.Wrapf(err, "Could not open executor.go")
+	}
+	defer f.Close()
+
+	var src string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		text := scanner.Text()
+		if regex.MatchString(text) {
+			break
+		}
+		src += text
+	}
+	tmpl := template.New("PluginTemplate for executor.go")
+	template.Must(tmpl.Parse(src + PluginTemplate))
+
+	tmpl.Execute(f, flake.ptemplates)
+
+	return nil
 }
