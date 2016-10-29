@@ -1,22 +1,39 @@
 package core
 
 import (
+	"bufio"
 	"fmt"
+	"html/template"
 	"io/ioutil"
+	"os"
+	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
+var PluginTemplate = `
+var run = map[string]func(...string) (string, error){
+	{{range .}}{{.Key}}: plugin.Run{{.Value}},{{end}}
+}
+`
+
+type Ptemplate struct {
+	Key   string
+	Value string
+}
+
+type Ptemplates []Ptemplate
+
 type Flake struct {
-	plugin  bool
-	pathCh  chan string
-	command *cobra.Command
+	plugin     bool
+	ptemplates Ptemplates
+	command    *cobra.Command
 }
 
 func FlakeNew() *Flake {
 	flake := &Flake{
-		pathCh: make(chan string),
 		command: &cobra.Command{
 			Use:   "flake",
 			Short: "run with cli mode",
@@ -40,25 +57,49 @@ func (flake *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
 }
 
 func (flake *Flake) pluginRegister() error {
-	base := "plugin"
-	fileInfos, err := ioutil.ReadDir(base)
+
+	fileInfos, err := ioutil.ReadDir("plugin")
 	if err != nil {
 		return errors.Wrapf(err, "Could not open plugin directory")
 	}
 
-	go flake.grepRunInPlugins()
-
-	for _, fi := range fileInfos {
-		flake.pathCh <- base + "/" + fi.Name()
-	}
+	flake.findSourceCode(fileInfos)
+	tmpl := template.New("PluginTemplate for executor.go")
+	template.Must(tmpl.Parse(PluginTemplate))
+	tmpl.Execute(os.Stdout, flake.ptemplates)
 
 	return nil
 }
 
-func (flake *Flake) grepRunInPlugins() {
+func (flake *Flake) findSourceCode(fileInfos []os.FileInfo) {
+	regex := regexp.MustCompile(`func Run\([A-Za-z]+\)`)
+
+	for _, fi := range fileInfos {
+		f, err := os.Open("plugin/" + fi.Name())
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		flake.grepRunInPlugins(regex, f)
+		f.Close()
+	}
+}
+
+func (flake *Flake) grepRunInPlugins(re *regexp.Regexp, f *os.File) {
 	// ここに open して Run[A-Za-z]+()を探して,
 	// map へ "[a-z]+":"Run[A-Za-z]+" を保存する
-	for _, path := range <-flake.pathCh {
-		fmt.Println(path)
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		text := scanner.Text()
+		if re.MatchString(text) {
+			captured := re.FindSubmatch([]byte(text))
+			name := string(captured[0])
+			flake.ptemplates = append(flake.ptemplates, Ptemplate{
+				Key:   strings.ToLower(name),
+				Value: name,
+			})
+
+			return
+		}
 	}
 }

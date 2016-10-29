@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/Code-Hex/salmon/core"
+	"../../../core"
 )
 
 func main() {
