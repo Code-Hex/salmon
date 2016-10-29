@@ -47,7 +47,7 @@ func FlakeNew() *Flake {
 	flake.command.RunE = flake.FlakeCmdRun
 
 	// Register flags on flake sub command
-	flake.command.Flags().BoolVarP(&flake.plugin, "plugin-register", "", false, "register plugin")
+	flake.command.Flags().BoolVarP(&flake.plugin, "plugin-register", "p", false, "register plugin")
 
 	return flake
 }
