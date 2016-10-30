@@ -6,7 +6,8 @@ import (
 )
 
 type Flake struct {
-	plugin  bool
+	pr      bool   `PluginRegistor`
+	pm      string `PluginMaker`
 	command *cobra.Command
 }
 
@@ -22,13 +23,18 @@ func FlakeNew() *Flake {
 	f.command.RunE = f.FlakeCmdRun
 
 	// Register flags on flake sub command
-	f.command.Flags().BoolVarP(&f.plugin, "plugin-register", "p", false, "register plugin")
+	f.command.Flags().BoolVarP(&f.pr, "plugin-register", "r", false, "register plugin")
+	f.command.Flags().StringVarP(&f.pm, "plugin-maker", "m", "", "plugin maker")
 
 	return f
 }
 
 func (f *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
-	if f.plugin {
+	if f.pm != "" {
+		return flake.PluginMaker(f.pm)
+	}
+
+	if f.pr {
 		return flake.PluginRegister()
 	}
 	return nil
