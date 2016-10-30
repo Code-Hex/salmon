@@ -3,15 +3,12 @@ package main
 import (
 	"fmt"
 
-	"../../../command"
+	"github.com/Code-Hex/salmon/core/command"
 )
 
 func main() {
 
-	src := `ping hello
-		 hello1
-
-		 world`
+	src := `help`
 	/*
 		parser := command.NewParser(src)
 
