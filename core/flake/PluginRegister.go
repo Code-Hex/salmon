@@ -19,6 +19,11 @@ var run = map[string]func(...string) (string, error){
 {{range .}}    "{{.Key}}": plugin.Run{{.Value}},
 {{end}}
 }
+
+var usage = map[string]string{
+{{range .}}    "{{.Key}}": plugin.Detail{{.Value}},
+{{end}}
+}
 `
 
 type Ptemplate struct {
@@ -40,6 +45,8 @@ func PluginRegister() error {
 	if err := migrateExecutorGo(ptemplates); err != nil {
 		return err
 	}
+
+	os.Stdout.WriteString("Migrated executor.go\n")
 
 	return nil
 }
