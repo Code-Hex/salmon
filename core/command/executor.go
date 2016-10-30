@@ -2,6 +2,7 @@ package command
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -17,13 +18,18 @@ func Execute(src string) (string, error) {
 	}
 
 	if exec.command == "help" {
-		return RunUsage()
+		return runUsage()
 	}
 
-	return run[exec.command](exec.args...)
+	cmd, ok := run[exec.command]
+	if ok {
+		return cmd(exec.args...)
+	}
+
+	return "", errors.New("Command does not exist")
 }
 
-func RunUsage() (string, error) {
+func runUsage() (string, error) {
 	var keys []string
 	var buf bytes.Buffer
 
@@ -41,13 +47,15 @@ func RunUsage() (string, error) {
 }
 
 var run = map[string]func(...string) (string, error){
-	"echo":   plugin.RunEcho,
-	"ping":   plugin.RunPing,
-	"update": plugin.RunUpdate,
+	"convert": plugin.RunConvert,
+	"echo":    plugin.RunEcho,
+	"ping":    plugin.RunPing,
+	"update":  plugin.RunUpdate,
 }
 
 var usage = map[string]string{
-	"echo":   plugin.DetailEcho,
-	"ping":   plugin.DetailPing,
-	"update": plugin.DetailUpdate,
+	"convert": plugin.DetailConvert,
+	"echo":    plugin.DetailEcho,
+	"ping":    plugin.DetailPing,
+	"update":  plugin.DetailUpdate,
 }
