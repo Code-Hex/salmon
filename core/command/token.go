@@ -9,13 +9,19 @@ const (
 	EOL
 	SPACE // white space
 	IDENT // identify
-
-	// command keywords
-	PING
 	HELP
+
+	// Command keywords
+	CONVERT
+	ECHO
+	PING
+	UPDATE
 )
 
 var CommandNames = map[string]Token{
-	"ping": PING,
-	"help": HELP,
+	"help":    HELP,
+	"convert": CONVERT,
+	"echo":    ECHO,
+	"ping":    PING,
+	"update":  UPDATE,
 }
