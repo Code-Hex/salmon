@@ -24,8 +24,8 @@ func (sc *Scanner) Scan() (tok Token, literal string, err error) {
 		tok = EOF
 		return
 	}
-	// fmt.Println(ch)
-	if isLetter(ch) {
+	// Scanning [A-Za-z0-9]+
+	if isLetter(ch) || isDigit(ch) {
 		literal = sc.scanIdentifier()
 		if token, ok := CommandNames[literal]; ok {
 			tok = token
