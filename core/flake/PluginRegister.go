@@ -7,14 +7,14 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"regexp"
 	"strings"
 
+	pipeline "github.com/mattn/go-pipeline"
 	"github.com/pkg/errors"
 )
 
-var PluginTemplate = `
+var ExecutorTmpl = `
 var run = map[string]func(...string) (string, error){
 {{range .}}    "{{.Key}}": plugin.Run{{.Value}},
 {{end}}
@@ -26,9 +26,21 @@ var usage = map[string]string{
 }
 `
 
+var TokenTmpl = `{{range .}}    {{.Const}}
+{{end}}
+)
+
+var CommandNames = map[string]Token{
+    "help": HELP,
+{{range .}}    "{{.Key}}": {{.Const}},
+{{end}}
+}
+`
+
 type Ptemplate struct {
 	Key   string
 	Value string
+	Const string
 }
 
 type Ptemplates []Ptemplate
@@ -46,7 +58,11 @@ func PluginRegister() error {
 		return err
 	}
 
-	os.Stdout.WriteString("Migrated executor.go\n")
+	if err := migrateTokenGo(ptemplates); err != nil {
+		return err
+	}
+
+	os.Stdout.WriteString("Migrated executor.go, token.go\n")
 
 	return nil
 }
@@ -79,6 +95,7 @@ func grepRunInPlugins(re *regexp.Regexp, f *os.File) Ptemplate {
 			return Ptemplate{
 				Key:   strings.ToLower(name),
 				Value: name,
+				Const: strings.ToTitle(name),
 			}
 		}
 	}
@@ -87,7 +104,6 @@ func grepRunInPlugins(re *regexp.Regexp, f *os.File) Ptemplate {
 }
 
 func migrateExecutorGo(ptemplates Ptemplates) error {
-	regex := regexp.MustCompile(`var run = map`)
 
 	f, err := os.OpenFile("executor.go", os.O_RDWR, 0666)
 	if err != nil {
@@ -99,7 +115,7 @@ func migrateExecutorGo(ptemplates Ptemplates) error {
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 		text := scanner.Text()
-		if regex.MatchString(text) {
+		if strings.Contains(text, `var run = map[string]func(...string)`) {
 			break
 		}
 		src += text + "\n"
@@ -108,14 +124,53 @@ func migrateExecutorGo(ptemplates Ptemplates) error {
 	f.Seek(0, io.SeekStart)
 	f.Truncate(0)
 
-	tmpl := template.New("PluginTemplate for executor.go")
-	template.Must(tmpl.Parse(src + PluginTemplate))
+	tmpl := template.New("ExecutorTmpl for executor.go")
+	template.Must(tmpl.Parse(src + ExecutorTmpl))
+
+	tmpl.Execute(f, ptemplates)
+	out, err := pipeline.Output([]string{"goimports", "executor.go"}, []string{"gofmt"})
+	if err != nil {
+		return errors.Wrapf(err, "Failed to static analyze")
+	}
+
+	f.Seek(0, io.SeekStart)
+	f.Truncate(0)
+
+	f.Write(out)
+
+	return nil
+}
+
+func migrateTokenGo(ptemplates Ptemplates) error {
+
+	f, err := os.OpenFile("token.go", os.O_RDWR, 0666)
+	if err != nil {
+		return errors.Wrapf(err, "Could not open token.go")
+	}
+	defer f.Close()
+
+	var src string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		text := scanner.Text()
+		if strings.Contains(text, `// Command keywords`) {
+			src += text + "\n"
+			break
+		}
+		src += text + "\n"
+	}
+
+	f.Seek(0, io.SeekStart)
+	f.Truncate(0)
+
+	tmpl := template.New("TokenTmpl for token.go")
+	template.Must(tmpl.Parse(src + TokenTmpl))
 
 	tmpl.Execute(f, ptemplates)
 
-	out, err := exec.Command("goimports", "executor.go").Output()
+	out, err := pipeline.Output([]string{"goimports", "token.go"}, []string{"gofmt"})
 	if err != nil {
-		return errors.Wrapf(err, "Failed goimports")
+		return errors.Wrapf(err, "Failed to static analyze")
 	}
 
 	f.Seek(0, io.SeekStart)
