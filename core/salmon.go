@@ -77,9 +77,7 @@ func (salmon *Salmon) Swim() int {
 func (salmon *Salmon) Dive(cmd *cobra.Command, args []string) error {
 	if salmon.version {
 		os.Stdout.Write([]byte(msg))
-	} else {
-		fmt.Println("salmon")
 	}
 
-	return nil
+	return cmd.Usage()
 }

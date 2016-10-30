@@ -6,6 +6,7 @@ import (
 )
 
 type Flake struct {
+	ed      bool   `ExecDebug`
 	pr      bool   `PluginRegistor`
 	pm      string `PluginMaker`
 	command *cobra.Command
@@ -23,6 +24,7 @@ func FlakeNew() *Flake {
 	f.command.RunE = f.FlakeCmdRun
 
 	// Register flags on flake sub command
+	f.command.Flags().BoolVarP(&f.ed, "exec-debug", "e", false, "command exec on cli")
 	f.command.Flags().BoolVarP(&f.pr, "plugin-register", "r", false, "register plugin")
 	f.command.Flags().StringVarP(&f.pm, "plugin-maker", "m", "", "plugin maker")
 
@@ -30,6 +32,11 @@ func FlakeNew() *Flake {
 }
 
 func (f *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
+
+	if f.ed {
+		return flake.ExecDebug(args)
+	}
+
 	if f.pm != "" {
 		return flake.PluginMaker(f.pm)
 	}
@@ -37,5 +44,6 @@ func (f *Flake) FlakeCmdRun(cmd *cobra.Command, args []string) error {
 	if f.pr {
 		return flake.PluginRegister()
 	}
-	return nil
+
+	return cmd.Usage()
 }
