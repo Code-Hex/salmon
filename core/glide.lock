@@ -1,5 +1,5 @@
 hash: 6461de30f42cd8da295088f679e448bc15579837159734c4b7360642ed221125
-updated: 2016-10-31T15:59:58.230247935+09:00
+updated: 2016-10-31T19:08:12.384999934+09:00
 imports:
 - name: github.com/alfredxing/calc
   version: 1b5495984fff6ac373c06a1b8882ec32259af7c6
@@ -9,7 +9,7 @@ imports:
   - operators
   - operators/functions
 - name: github.com/Code-Hex/salmon
-  version: c91fd5b6af4626f15e676012c9ddd65949e80a26
+  version: f51b16ef18d6f950a050b5b30d0ef7b6a07ebc00
   subpackages:
   - core
   - core/command

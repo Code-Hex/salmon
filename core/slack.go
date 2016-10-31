@@ -1,9 +1,11 @@
 package core
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
 
-	"github.com/k0kubun/pp"
+	"github.com/Code-Hex/salmon/core/command"
 	"github.com/nlopes/slack"
 	"github.com/spf13/cobra"
 )
@@ -27,47 +29,73 @@ func (salmon *Salmon) connectRTM() {
 	for {
 		select {
 		case msg := <-salmon.rtm.IncomingEvents:
-			salmon.logger.Info("Event Received: ")
 			switch ev := msg.Data.(type) {
-			case *slack.HelloEvent:
-				// Ignore hello
-
-			case *slack.ConnectedEvent:
-				// fmt.Println("Infos:", zap.String(ev.Info))
-				// salmon.logger.Info("Connection counter:", ev.ConnectionCount)
-				// Replace #general with your Channel ID
-				salmon.rtm.SendMessage(salmon.rtm.NewOutgoingMessage("Hello world", "#general"))
-
 			case *slack.MessageEvent:
-				//Parse(ev.Text)
-				pp.Print(ev.Text)
-				salmon.Reply("Hi!!", ev.Msg.User, ev.Msg.Channel)
-				salmon.logger.Info(fmt.Sprintf("Message: %v\n", ev))
-
+				id, msg := ToWhom(ev.Text)
+				if salmon.IsMe(id) {
+					salmon.Reply(msg, ev)
+				}
 			case *slack.PresenceChangeEvent:
 				salmon.logger.Info(fmt.Sprintf("Presence Change: %v\n", ev))
 
-			case *slack.LatencyReport:
-				salmon.logger.Info(fmt.Sprintf("Current latency: %v\n", ev.Value))
-
 			case *slack.RTMError:
-				salmon.logger.Info(fmt.Sprintf("Error: %s\n", ev.Error()))
-
-			case *slack.FileSharedEvent:
-				salmon.logger.Info(fmt.Sprintf("File: %v\n", ev))
-
-			case *slack.InvalidAuthEvent:
-				salmon.logger.Info("Invalid credentials")
+				salmon.logger.Error(fmt.Sprintf("Error: %s\n", ev.Error()))
 				return
 			default:
-
 				// Ignore other events..
-				// fmt.Printf("Unexpected: %v\n", msg.Data)
 			}
 		}
 	}
 }
 
-func (salmon *Salmon) Reply(msg, user, channel string) {
+func (salmon *Salmon) IsMe(id string) bool {
+	user, err := salmon.slack.GetUserInfo(id)
+	if err != nil {
+		salmon.logger.Error(err.Error())
+		return false
+	}
+	return user.Name == "salmon"
+}
+
+func ToWhom(s string) (string, string) {
+	var flag = false
+	var index = 0
+	var buf bytes.Buffer
+
+	ch := []rune(s)
+	len := len(ch)
+
+	for i := 0; i < len; i++ {
+		if ch[i] == '<' {
+			if i+1 < len && ch[i+1] == '@' {
+				i++
+				flag = true
+				continue
+			}
+		}
+
+		if ch[i] == '>' {
+			index = i + 1
+			break
+		}
+
+		if flag {
+			buf.WriteRune(ch[i])
+		}
+	}
+
+	return buf.String(), strings.TrimSpace(string(ch[index:]))
+}
+
+func (salmon *Salmon) Reply(msg string, ev *slack.MessageEvent) {
+	out, err := command.Execute(msg)
+	if err != nil {
+		salmon.RTMReply(err.Error(), ev.Msg.User, ev.Msg.Channel)
+		return
+	}
+	salmon.RTMReply("\n"+out, ev.Msg.User, ev.Msg.Channel)
+}
+
+func (salmon *Salmon) RTMReply(msg, user, channel string) {
 	salmon.rtm.SendMessage(salmon.rtm.NewOutgoingMessage(fmt.Sprintf("<@%s> %s", user, msg), channel))
 }
