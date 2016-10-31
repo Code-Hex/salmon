@@ -24,8 +24,8 @@ func (sc *Scanner) Scan() (tok Token, literal string, err error) {
 		tok = EOF
 		return
 	}
-	// Scanning [A-Za-z0-9]+
-	if isLetter(ch) || isDigit(ch) {
+	// Scanning ascii
+	if isLetter(ch) || isDigit(ch) || isSymbol(ch) {
 		literal = sc.scanIdentifier()
 		if token, ok := CommandNames[literal]; ok {
 			tok = token
@@ -54,10 +54,7 @@ func (sc *Scanner) skipWhiteSpace() {
 func (sc *Scanner) scanIdentifier() string {
 	var buf bytes.Buffer
 
-	for {
-		if !isLetter(sc.peek()) && !isDigit(sc.peek()) {
-			break
-		}
+	for isLetter(sc.peek()) || isDigit(sc.peek()) || isSymbol(sc.peek()) {
 		buf.WriteRune(sc.peek())
 		sc.next()
 	}
@@ -107,10 +104,13 @@ func (sc *Scanner) isEOL(ch rune) bool {
 	return ch == '\n'
 }
 
+func isSymbol(ch rune) bool {
+	return ('!' <= ch && ch <= '/') || (':' <= ch && ch <= '@') || ('[' <= ch && ch <= '`') || ('>' <= ch && ch <= '~')
+}
 func isLetter(ch rune) bool {
-	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')
 }
 
 func isDigit(ch rune) bool {
-	return ch >= '0' && ch <= '9'
+	return '0' <= ch && ch <= '9'
 }

@@ -12,6 +12,7 @@ const (
 	HELP
 
 	// Command keywords
+	CALC
 	CONVERT
 	ECHO
 	PING
@@ -20,6 +21,7 @@ const (
 
 var CommandNames = map[string]Token{
 	"help":    HELP,
+	"calc":    CALC,
 	"convert": CONVERT,
 	"echo":    ECHO,
 	"ping":    PING,

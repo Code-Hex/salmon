@@ -47,6 +47,7 @@ func runUsage() (string, error) {
 }
 
 var run = map[string]func(...string) (string, error){
+	"calc":    plugin.RunCalc,
 	"convert": plugin.RunConvert,
 	"echo":    plugin.RunEcho,
 	"ping":    plugin.RunPing,
@@ -54,6 +55,7 @@ var run = map[string]func(...string) (string, error){
 }
 
 var usage = map[string]string{
+	"calc":    plugin.DetailCalc,
 	"convert": plugin.DetailConvert,
 	"echo":    plugin.DetailEcho,
 	"ping":    plugin.DetailPing,
