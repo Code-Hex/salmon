@@ -8,7 +8,7 @@ import (
 )
 
 // DetailCalc is description calc command
-var DetailCalc = "calculator. see calc help."
+var DetailCalc = `calculator. invoke "calc usage".`
 var help = `Operators:
   +, -, *, /, ^, %
 Functions: 
@@ -21,7 +21,7 @@ Constants:
 func RunCalc(args ...string) (string, error) {
 	src := strings.Join(args, " ")
 
-	if strings.Contains(src, "help") {
+	if strings.Contains(src, "usage") {
 		return help, nil
 	}
 
