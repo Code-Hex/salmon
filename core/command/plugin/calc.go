@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 
@@ -19,6 +20,10 @@ Constants:
 
 // RunCalc is root function of calc command
 func RunCalc(args ...string) (string, error) {
+	if len(args) == 0 {
+		return "", errors.New("Arguments does not exist.")
+	}
+
 	src := strings.Join(args, " ")
 
 	if strings.Contains(src, "usage") {

@@ -12,6 +12,9 @@ var DetailConvert = "convert bin, hex, decimal"
 
 // RunConvert is root function of convert command
 func RunConvert(args ...string) (string, error) {
+	if len(args) == 0 {
+		return "", errors.New("Arguments does not exist.")
+	}
 	return convert(args[0])
 }
 
