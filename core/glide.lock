@@ -1,10 +1,20 @@
 hash: 6461de30f42cd8da295088f679e448bc15579837159734c4b7360642ed221125
-updated: 2016-10-31T00:17:07.755486852+09:00
+updated: 2016-10-31T15:57:37.816163592+09:00
 imports:
+- name: github.com/alfredxing/calc
+  version: 1b5495984fff6ac373c06a1b8882ec32259af7c6
+  subpackages:
+  - compute
+  - constants
+  - operators
+  - operators/functions
 - name: github.com/Code-Hex/salmon
-  version: 3f07ec52d2178a21b30aeb7b5b496e00caac5d0d
+  version: 9afa44543b923f9a79a285695b2e8ab08d880181
   subpackages:
   - core
+  - core/command
+  - core/command/plugin
+  - core/flake
 - name: github.com/fatih/color
   version: bf82308e8c8546dc2b945157173eb8a959ae9505
 - name: github.com/inconshreveable/mousetrap
@@ -18,7 +28,7 @@ imports:
 - name: github.com/mattn/go-pipeline
   version: 4861b26ff5ba4743d594f2a8f763fe10be34e018
 - name: github.com/nlopes/slack
-  version: d2250d0b977670083c023c7a45e1ba11fd382ba2
+  version: e595e9d8590a04ff76407e4e7d1791d25b095c66
 - name: github.com/pkg/errors
   version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
 - name: github.com/spf13/cobra

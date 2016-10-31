@@ -25,7 +25,7 @@ func RunCalc(args ...string) (string, error) {
 		return help, nil
 	}
 
-	res, err := compute.Evaluate()
+	res, err := compute.Evaluate(src)
 	if err != nil {
 		return "", err
 	}
