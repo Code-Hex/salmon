@@ -7,4 +7,4 @@ import:
 - package: github.com/nlopes/slack
 - package: github.com/pkg/errors
 - package: github.com/spf13/cobra
-- package: github.com/uber-go/zap
+- package: go.uber.org/zap

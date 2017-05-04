@@ -1,50 +1,91 @@
-hash: 6461de30f42cd8da295088f679e448bc15579837159734c4b7360642ed221125
-updated: 2016-10-31T19:08:12.384999934+09:00
+hash: 1d845cf7f48613f5822c71ff2438fbedbc327da4eccdcd9af2e51d06355f37be
+updated: 2017-05-04T22:32:47.504594597+09:00
 imports:
 - name: github.com/alfredxing/calc
-  version: 1b5495984fff6ac373c06a1b8882ec32259af7c6
+  version: 0b39213bb782b6cf0efe522bad07e5ace546ed79
   subpackages:
   - compute
   - constants
   - operators
   - operators/functions
+- name: github.com/cenkalti/backoff
+  version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/Code-Hex/salmon
-  version: f51b16ef18d6f950a050b5b30d0ef7b6a07ebc00
+  version: fdf77440763af1242f638ec0917a28407abd03de
   subpackages:
   - core
-  - core/command
-  - core/command/plugin
-  - core/flake
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
 - name: github.com/fatih/color
-  version: bf82308e8c8546dc2b945157173eb8a959ae9505
+  version: 9131ab34cf20d2f6d83fdc67168a5430d1c7dc23
+- name: github.com/golang/protobuf
+  version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
+  subpackages:
+  - proto
+- name: github.com/gorilla/websocket
+  version: a91eba7f97777409bc2c443f5534d41dd20c5720
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/k0kubun/pp
-  version: f5dce6ed0ccf6c350f1679964ff6b61f3d6d2033
+  version: d1532fc5d94ecdf2da29e24d7b99721f3287de4a
+- name: github.com/lestrrat/go-pdebug
+  version: 2e6eaaa5717f81bda41d27070d3c966f40a1e75f
+- name: github.com/lestrrat/go-slack
+  version: bd2e256dcee3a30c9f3634ebd4c7defb1b8a2552
+  subpackages:
+  - objects
+  - rtm
 - name: github.com/mattn/go-colorable
-  version: 6c903ff4aa50920ca86087a280590b36b3152b9c
+  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+  repo: https://github.com/mattn/go-colorable
 - name: github.com/mattn/go-isatty
-  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+  repo: https://github.com/mattn/go-isatty
 - name: github.com/mattn/go-pipeline
   version: 4861b26ff5ba4743d594f2a8f763fe10be34e018
 - name: github.com/nlopes/slack
-  version: e595e9d8590a04ff76407e4e7d1791d25b095c66
+  version: 72d15a0fc0b773a59c00f78b9e7d97eeb8c4281f
 - name: github.com/pkg/errors
-  version: 839d9e913e063e28dfd0e6c7b7512793e0a48be9
+  version: ff09b135c25aae272398c51a07235b90a75aa4f0
 - name: github.com/spf13/cobra
-  version: 6e91dded25d73176bf7f60b40dd7aa1f0bf9be8d
+  version: 8f0203be891287870100e4af46262cdf4a4261d1
 - name: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
-- name: github.com/uber-go/atomic
-  version: 9e99152552a6ce13fa3b2ce4a9c4fb117cca4506
-- name: github.com/uber-go/zap
-  version: f2929c57adb5be8fb03cad9a6912c509a5cb60af
-- name: golang.org/x/net
-  version: 8b4af36cd21a1f85a7484b49feb7c79363106d8e
+  version: c990990ab4981d84da820b7b00c85139ca150b5f
+- name: go.uber.org/atomic
+  version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
+- name: go.uber.org/zap
+  version: 7641ffe6315b3cb6274a020e6db8e87db4d46bc0
   subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - internal/multierror
+  - zapcore
+- name: golang.org/x/net
+  version: feeb485667d1fdabe727840fe00adc22431bc86e
+  subpackages:
+  - context
   - websocket
+- name: golang.org/x/oauth2
+  version: a6bd8cefa1811bd24b86f8902872e4e8225f74c4
+  subpackages:
+  - internal
 - name: golang.org/x/sys
-  version: c200b10b5d5e122be351b67af224adc6128af5bf
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  repo: https://go.googlesource.com/sys
   subpackages:
   - unix
+- name: google.golang.org/appengine
+  version: 170382fa85b10b94728989dfcf6cc818b335c952
+  subpackages:
+  - internal
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
+  - internal/urlfetch
+  - urlfetch
 testImports: []
