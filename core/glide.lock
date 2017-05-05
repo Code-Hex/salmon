@@ -1,5 +1,5 @@
-hash: 1d845cf7f48613f5822c71ff2438fbedbc327da4eccdcd9af2e51d06355f37be
-updated: 2017-05-04T22:32:47.504594597+09:00
+hash: 2fb65c7a2e6be88d13a3738d9de329ad264123e9bfde835377272fcd627107a2
+updated: 2017-05-04T22:54:35.098107112+09:00
 imports:
 - name: github.com/alfredxing/calc
   version: 0b39213bb782b6cf0efe522bad07e5ace546ed79
@@ -11,9 +11,12 @@ imports:
 - name: github.com/cenkalti/backoff
   version: 5d150e7eec023ce7a124856b37c68e54b4050ac7
 - name: github.com/Code-Hex/salmon
-  version: fdf77440763af1242f638ec0917a28407abd03de
+  version: 53664a286974a456017a442ce708bc828dfeb4ae
   subpackages:
   - core
+  - core/command
+  - core/command/plugin
+  - core/flake
 - name: github.com/davecgh/go-spew
   version: 346938d642f2ec3594ed81d874461961cd0faa76
   subpackages:
@@ -53,6 +56,8 @@ imports:
   version: 8f0203be891287870100e4af46262cdf4a4261d1
 - name: github.com/spf13/pflag
   version: c990990ab4981d84da820b7b00c85139ca150b5f
+- name: github.com/uber-go/zap
+  version: 7641ffe6315b3cb6274a020e6db8e87db4d46bc0
 - name: go.uber.org/atomic
   version: 4e336646b2ef9fc6e47be8e21594178f98e5ebcf
 - name: go.uber.org/zap

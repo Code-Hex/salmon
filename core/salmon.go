@@ -3,15 +3,15 @@ package core
 import (
 	"fmt"
 	"os"
-	"time"
 
-	"github.com/nlopes/slack"
+	slack "github.com/lestrrat/go-slack"
+	rtm "github.com/lestrrat/go-slack/rtm"
 	"github.com/spf13/cobra"
-	"github.com/uber-go/zap"
+	"go.uber.org/zap"
 )
 
 const (
-	version = "0.0.1"
+	version = "0.0.2"
 	msg     = "salmon v" + version + ", salmon is .* bot\n"
 )
 
@@ -22,8 +22,8 @@ type Salmon struct {
 	swim    *cobra.Command
 	slack   *slack.Client
 	flake   *Flake
-	rtm     *slack.RTM
-	logger  zap.Logger
+	rtm     *rtm.Client
+	logger  *zap.Logger
 }
 
 func (salmon *Salmon) RootCmdNew() *cobra.Command {
@@ -36,17 +36,34 @@ func (salmon *Salmon) RootCmdNew() *cobra.Command {
 	}
 }
 
-func Generate(Out zap.WriteSyncer) *Salmon {
+func Generate() *Salmon {
 	slack := slack.New(os.Getenv("SLACK_TOKEN"))
 	salmon := &Salmon{
 		slack: slack,
 		flake: FlakeNew(),
-		rtm:   slack.NewRTM(),
-		logger: zap.New(
-			zap.NewTextEncoder(zap.TextTimeFormat(time.ANSIC)),
-			zap.AddCaller(), // Add line number option
-			zap.Output(Out),
-		),
+		rtm:   rtm.New(slack),
+	}
+
+	switch os.Getenv("STAGE") {
+	case "production":
+		logger, err := zap.NewProduction(
+			zap.AddCaller(),
+		)
+		if err != nil {
+			panic("Failed to set logger")
+		}
+		salmon.logger = logger
+	case "development":
+		logger, err := zap.NewDevelopment(
+			zap.AddCaller(),
+		)
+		if err != nil {
+			panic("Failed to set logger")
+		}
+		salmon.logger = logger
+	default:
+		fmt.Fprintln(os.Stderr, `Do not specified "STAGE" environment variable`)
+		os.Exit(1)
 	}
 
 	salmon.swim = salmon.RootCmdNew()

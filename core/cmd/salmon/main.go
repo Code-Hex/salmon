@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-	os.Exit(core.Generate(os.Stdout).Swim())
+	os.Exit(core.Generate().Swim())
 }

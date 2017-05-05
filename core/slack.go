@@ -2,11 +2,15 @@ package core
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"strings"
 
+	"syscall"
+
 	"github.com/Code-Hex/salmon/core/command"
-	"github.com/nlopes/slack"
+	"github.com/Code-Hex/sigctx"
+	"github.com/lestrrat/go-slack/rtm"
 	"github.com/spf13/cobra"
 )
 
@@ -24,23 +28,33 @@ func (salmon *Salmon) SlackCmdRun(cmd *cobra.Command, args []string) {
 }
 
 func (salmon *Salmon) connectRTM() {
-	go salmon.rtm.ManageConnection()
+	ctx := sigctx.WithCancelSignals(
+		context.Background(),
+		syscall.SIGINT,
+		syscall.SIGHUP,
+		syscall.SIGTERM,
+	)
+	go func() {
+		if err := salmon.rtm.Run(ctx); err != nil {
+			panic(err)
+		}
+	}()
 
 	for {
 		select {
-		case msg := <-salmon.rtm.IncomingEvents:
-			switch ev := msg.Data.(type) {
-			case *slack.MessageEvent:
-				id, msg := ToWhom(ev.Text)
-				if salmon.IsMe(id) {
-					salmon.Reply(msg, ev)
+		case e := <-salmon.rtm.Events():
+			switch typ := e.Type(); typ {
+			case rtm.MessageType:
+				msgev := e.Data().(*rtm.MessageEvent)
+				id, msg := ToWhom(msgev.Text)
+				if salmon.IsMe(ctx, id) {
+					salmon.Reply(ctx, msg, msgev)
 				}
-			case *slack.PresenceChangeEvent:
-				salmon.logger.Info(fmt.Sprintf("Presence Change: %v\n", ev))
-
-			case *slack.RTMError:
-				salmon.logger.Error(fmt.Sprintf("Error: %s\n", ev.Error()))
-				return
+			case rtm.PresenceChangeType:
+				pchev := e.Data().(*rtm.PresenceChangeEvent)
+				salmon.logger.Info(fmt.Sprintf("Presence Change: %v\n", pchev))
+			case rtm.InvalidEventType:
+				salmon.logger.Info(fmt.Sprintf("Invalid EventType\n"))
 			default:
 				// Ignore other events..
 			}
@@ -48,8 +62,8 @@ func (salmon *Salmon) connectRTM() {
 	}
 }
 
-func (salmon *Salmon) IsMe(id string) bool {
-	user, err := salmon.slack.GetUserInfo(id)
+func (salmon *Salmon) IsMe(ctx context.Context, id string) bool {
+	user, err := salmon.slack.Users().Info(id).Do(ctx)
 	if err != nil {
 		salmon.logger.Error(err.Error())
 		return false
@@ -87,15 +101,15 @@ func ToWhom(s string) (string, string) {
 	return buf.String(), strings.TrimSpace(string(ch[index:]))
 }
 
-func (salmon *Salmon) Reply(msg string, ev *slack.MessageEvent) {
+func (salmon *Salmon) Reply(ctx context.Context, msg string, ev *rtm.MessageEvent) {
 	out, err := command.Execute(msg)
 	if err != nil {
-		salmon.RTMReply(err.Error(), ev.Msg.User, ev.Msg.Channel)
+		salmon.RTMReply(ctx, err.Error(), ev.User, ev.Channel)
 		return
 	}
-	salmon.RTMReply("\n"+out, ev.Msg.User, ev.Msg.Channel)
+	salmon.RTMReply(ctx, "\n"+out, ev.User, ev.Channel)
 }
 
-func (salmon *Salmon) RTMReply(msg, user, channel string) {
-	salmon.rtm.SendMessage(salmon.rtm.NewOutgoingMessage(fmt.Sprintf("<@%s> %s", user, msg), channel))
+func (salmon *Salmon) RTMReply(ctx context.Context, msg, user, channel string) {
+	salmon.slack.Chat().PostMessage(channel).Username(user).Text(msg).Do(ctx)
 }
